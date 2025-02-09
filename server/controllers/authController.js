@@ -168,3 +168,51 @@ export const resetPassword = async (req, res) => {
     res.status(500).send('Server error');
   }
 };
+
+export const changePassword = async (req, res) => {
+  try {
+    // Extract token from headers
+    const authHeader = req.header('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ msg: 'Unauthorized: No token provided' });
+    }
+
+    // Decode the token
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    // Find user and ensure password field is available
+    const user = await User.findById(userId).select('+password');
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    const { oldPassword, newPassword } = req.body;
+
+    // Validate input fields
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ msg: 'Both old and new passwords are required' });
+    }
+
+    // Check if old password is correct
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ msg: 'Old password is incorrect' });
+    }
+
+    // Ensure the new password is different from the old one
+    if (oldPassword === newPassword) {
+      return res.status(400).json({ msg: 'New password cannot be the same as the old password' });
+    }
+
+    // Hash and update the new password
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.status(200).json({ success: true, msg: 'Password changed successfully' });
+  } catch (err) {
+    console.error('Server Error:', err.message);
+    res.status(500).json({ msg: 'Internal server error' });
+  }
+};
