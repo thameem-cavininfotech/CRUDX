@@ -1,7 +1,7 @@
-import User from '../../models/User.js';
+import User from '../models/User.js';
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import sendEmail from "../../utils/sendEmail.js"
+import sendEmail from "../utils/sendEmail.js"
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public

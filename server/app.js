@@ -5,7 +5,8 @@ import dotenv from "dotenv";
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
-import { protect } from "./controllers/authMiddleware.js";
+import noteRoutes from './routes/noteRoutes.js';
+import { protect } from "./controllers/middleware/authMiddleware.js";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(cors());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users',protect, userRoutes);
+app.use('/api/notes',protect, noteRoutes);
 
 
 
